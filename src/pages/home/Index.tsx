@@ -72,12 +72,12 @@ const Home = () => {
       check: false,
       name: form.getFieldValue("name"),
       description: form.getFieldValue("description"),
-      quantity: form.getFieldValue("qdt") | 1,
-      unit: form.getFieldValue("uni"),
+      quantity: form.getFieldValue("quantity") || 1,
+      unit: form.getFieldValue("unit"),
       price: form.getFieldValue("price"),
       created_at: new Date().toISOString(),
     };
-
+  
     putListItem(list);
   };
 

@@ -4,10 +4,19 @@ import { getUser } from "../../services/user.ws";
 import { useParams } from "react-router-dom";
 import "./Index.css";
 import Cookies from "js-cookie";
-const Login = () => {
-  const [visible, setVisible] = useState(false);
-  const [modal, setModal] = useState(false);
-  const { msn } = useParams();
+
+interface User {
+  active: boolean;
+  categoria?: string;
+}
+
+const Login: React.FC = () => {
+  const [visible, setVisible] = useState<boolean>(false);
+  const [modal, setModal] = useState<boolean>(false);
+  const { msn } = useParams<{ msn: string }>();
+  const [password, setPassword] = useState<string>("");
+  const [form] = Form.useForm();
+
   useEffect(() => {
     if (msn === "error") {
       message.error("Usuário sem permissão", 5);
@@ -35,20 +44,19 @@ const Login = () => {
     Cookies.set("acceptsCookies", "true");
     setModal(false);
   };
+
   const handleCancel = () => {
     setModal(false);
   };
 
-  const [password, setPassword] = useState<string>("");
-
-  const [form] = Form.useForm();
-
   const acessar = () => {
     GetUsuario();
   };
+
   useEffect(() => {
     getCachedDateUser();
   }, []);
+
   const GetUsuario = async () => {
     setVisible(true);
     const data = {
@@ -56,10 +64,13 @@ const Login = () => {
       password: password,
     };
 
-    const UserCollection = await getUser(data);
+    const UserCollection: any = await getUser(data);
 
-    if (UserCollection.user.length > 0) {
-      localStorage.setItem("dateUser", JSON.stringify(UserCollection.user[0]));
+    if (UserCollection?.user?.length ?? 0 > 0) {
+      localStorage.setItem(
+        "dateUser",
+        JSON.stringify(UserCollection?.user[0] ?? {})
+      );
 
       Cookies.set(
         "token",
@@ -80,14 +91,16 @@ const Login = () => {
       setVisible(false);
     }
   };
+
   const getCachedDateUser = () => {
     const cachedData = localStorage.getItem("dateUser");
     if (cachedData) {
-      if (JSON.parse(cachedData).active === false) {
+      const parsedData: User = JSON.parse(cachedData);
+      if (parsedData.active === false) {
         message.error("Usuário desativado");
       } else if (
-        JSON.parse(cachedData).categoria === "ADM" ||
-        JSON.parse(cachedData).categoria === "Gerência"
+        parsedData.categoria === "ADM" ||
+        parsedData.categoria === "Gerência"
       ) {
         window.location.href = "/home";
       } else {
@@ -96,6 +109,7 @@ const Login = () => {
     }
     return cachedData ? JSON.parse(cachedData) : null;
   };
+
   return (
     <div className="content-background">
       <div className="container">
@@ -130,9 +144,9 @@ const Login = () => {
           >
             <Input
               type="password"
-              onChange={(e: {
-                target: { value: React.SetStateAction<string> };
-              }) => setPassword(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
             />
           </Form.Item>
         </Form>
